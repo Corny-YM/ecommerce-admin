@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { UserButton, auth } from "@clerk/nextjs";
-import StoreSwitcher from "./store-switcher";
-import MainNav from "./main-nax";
 import prismadb from "@/lib/prismadb";
+import StoreSwitcher from "./store-switcher";
+import MainNav from "./main-nav";
 
 const Navbar = async () => {
   const { userId } = auth();
