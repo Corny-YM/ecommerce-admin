@@ -70,6 +70,7 @@ const BillboardForm = ({ initialData }: BillboardFormProps) => {
       }
       toast.success(toastMessage);
       router.push(`/${params.storeId}/billboards`);
+      router.refresh();
     } catch (err) {
       toast.error("Something went wrong");
     } finally {
@@ -84,8 +85,8 @@ const BillboardForm = ({ initialData }: BillboardFormProps) => {
       await axios.delete(
         `/api/${params.storeId}/billboards/${params.billboardId}`
       );
-      // router.refresh();
-      router.push("/");
+      router.push(`/${params.storeId}/billboards`);
+      router.refresh();
       toast.success("Store deleted");
     } catch (err) {
       toast.error(
@@ -165,7 +166,6 @@ const BillboardForm = ({ initialData }: BillboardFormProps) => {
           </Button>
         </form>
       </Form>
-      <Separator />
     </>
   );
 };
