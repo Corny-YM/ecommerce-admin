@@ -23,7 +23,7 @@ export const ImageUpload = ({
 
   useEffect(() => {
     setIsMounted(true);
-  });
+  }, []);
 
   const onUpload = (result: any) => {
     onChange(result.info.secure_url);
