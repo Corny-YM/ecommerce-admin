@@ -10,7 +10,7 @@ export async function GET(
     if (!params.categoryId)
       return new NextResponse("Category ID is required", { status: 400 });
 
-    const categories = await prismadb.category.findUnique({
+    let category = await prismadb.category.findUnique({
       where: {
         id: params.categoryId,
       },
@@ -19,7 +19,17 @@ export async function GET(
       },
     });
 
-    return NextResponse.json(categories);
+    if (!category)
+      category = await prismadb.category.findFirst({
+        where: {
+          storeId: params.storeId,
+        },
+        include: {
+          billboard: true,
+        },
+      });
+
+    return NextResponse.json(category);
   } catch (err) {
     console.log("[CATEGORY_GET]", err);
     return new NextResponse("Internal error", { status: 500 });
