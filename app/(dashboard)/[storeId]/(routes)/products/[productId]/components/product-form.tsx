@@ -8,8 +8,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useParams, useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useOrigin } from "@/hooks/use-origin";
 import { Category, Color, Image, Product, Size } from "@prisma/client";
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
@@ -17,6 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { AlertModal } from "@/components/modals/alert-modal";
+import { ComboboxMultiSelect } from "@/components/ui/combobox-multi-select";
 import {
   Form,
   FormControl,
@@ -52,8 +53,8 @@ const formSchema = z.object({
   images: z.object({ url: z.string() }).array(),
   price: z.coerce.number().min(1),
   categoryId: z.string().min(1),
-  colorId: z.string().min(1),
-  sizeId: z.string().min(1),
+  colorIds: z.array(z.string()),
+  sizeIds: z.array(z.string()),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
 });
@@ -66,7 +67,6 @@ const ProductForm = ({
 }: ProductFormProps) => {
   const params = useParams();
   const router = useRouter();
-  const origin = useOrigin();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -84,8 +84,8 @@ const ProductForm = ({
           images: [],
           price: 0,
           categoryId: "",
-          colorId: "",
-          sizeId: "",
+          colorIds: [],
+          sizeIds: [],
           isFeatured: false,
           isArchived: false,
         },
@@ -93,18 +93,19 @@ const ProductForm = ({
 
   const onSubmit = async (values: ProductFormValues) => {
     try {
-      setLoading(true);
-      if (initialData) {
-        await axios.patch(
-          `/api/${params.storeId}/products/${params.productId}`,
-          values
-        );
-      } else {
-        await axios.post(`/api/${params.storeId}/products`, values);
-      }
-      toast.success(toastMessage);
-      router.push(`/${params.storeId}/products`);
-      router.refresh();
+      console.log(values);
+      // setLoading(true);
+      // if (initialData) {
+      //   await axios.patch(
+      //     `/api/${params.storeId}/products/${params.productId}`,
+      //     values
+      //   );
+      // } else {
+      //   await axios.post(`/api/${params.storeId}/products`, values);
+      // }
+      // toast.success(toastMessage);
+      // router.push(`/${params.storeId}/products`);
+      // router.refresh();
     } catch (err) {
       toast.error("Something went wrong");
     } finally {
@@ -179,185 +180,164 @@ const ProductForm = ({
               </FormItem>
             )}
           />
-          <div className="grid grid-cols-3 gap-8">
-            {/* Name */}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Product name"
+          {/* <div className="grid grid-cols-3 gap-8"> */}
+          <div className="flex flex-col justify-center items-center gap-y-4">
+            <div className="w-full grid grid-cols-3 gap-4">
+              {/* Name */}
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Product name"
+                        disabled={loading}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* Price */}
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Price</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="9.99"
+                        disabled={loading}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* Category */}
+              <FormField
+                control={form.control}
+                name="categoryId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <Select
                       disabled={loading}
-                      {...field}
+                      value={field.value}
+                      defaultValue={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue
+                            placeholder="Select a category"
+                            defaultValue={field.value}
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {categories?.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="w-full h-fit grid grid-cols-2 gap-4">
+              {/* Size */}
+              <FormField
+                control={form.control}
+                name="sizeIds"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Size</FormLabel>
+                    <ComboboxMultiSelect
+                      title="sizes"
+                      items={sizes.map((item) => ({
+                        value: item.id,
+                        label: item.name,
+                      }))}
+                      onChange={field.onChange}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Price */}
-            <FormField
-              control={form.control}
-              name="price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Price</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="9.99"
-                      disabled={loading}
-                      {...field}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* Color */}
+              <FormField
+                control={form.control}
+                name="colorIds"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Color</FormLabel>
+                    <ComboboxMultiSelect
+                      title="colors"
+                      items={colors.map((item) => ({
+                        value: item.id,
+                        label: item.name,
+                      }))}
+                      onChange={field.onChange}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Category */}
-            <FormField
-              control={form.control}
-              name="categoryId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category</FormLabel>
-                  <Select
-                    disabled={loading}
-                    value={field.value}
-                    defaultValue={field.value}
-                    onValueChange={field.onChange}
-                  >
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="w-full grid grid-cols-2 gap-4">
+              {/* Feature */}
+              <FormField
+                control={form.control}
+                name="isFeatured"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder="Select a category"
-                          defaultValue={field.value}
-                        />
-                      </SelectTrigger>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
                     </FormControl>
-                    <SelectContent>
-                      {categories?.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Size */}
-            <FormField
-              control={form.control}
-              name="sizeId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Size</FormLabel>
-                  <Select
-                    disabled={loading}
-                    value={field.value}
-                    defaultValue={field.value}
-                    onValueChange={field.onChange}
-                  >
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Featured</FormLabel>
+                      <FormDescription>
+                        This product will appear on the home page
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              {/* Archived */}
+              <FormField
+                control={form.control}
+                name="isArchived"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder="Select a size"
-                          defaultValue={field.value}
-                        />
-                      </SelectTrigger>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
                     </FormControl>
-                    <SelectContent>
-                      {sizes?.map((size) => (
-                        <SelectItem key={size.id} value={size.id}>
-                          {size.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Color */}
-            <FormField
-              control={form.control}
-              name="colorId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Color</FormLabel>
-                  <Select
-                    disabled={loading}
-                    value={field.value}
-                    defaultValue={field.value}
-                    onValueChange={field.onChange}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder="Select a color"
-                          defaultValue={field.value}
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {colors?.map((color) => (
-                        <SelectItem key={color.id} value={color.id}>
-                          {color.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Feature */}
-            <FormField
-              control={form.control}
-              name="isFeatured"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Featured</FormLabel>
-                    <FormDescription>
-                      This product will appear on the home page
-                    </FormDescription>
-                  </div>
-                </FormItem>
-              )}
-            />
-            {/* Archived */}
-            <FormField
-              control={form.control}
-              name="isArchived"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Archived</FormLabel>
-                    <FormDescription>
-                      This product will not appear anywhere in the store
-                    </FormDescription>
-                  </div>
-                </FormItem>
-              )}
-            />
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Archived</FormLabel>
+                      <FormDescription>
+                        This product will not appear anywhere in the store
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
           <Button disabled={loading} className="ml-auto" type="submit">
             {action}
