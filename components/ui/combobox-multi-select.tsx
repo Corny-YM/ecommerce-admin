@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/popover";
 
 interface Props {
+  values: string[];
   title?: string | null;
   items: { value: string; label: string }[];
   onChange: (value: string[]) => void;
@@ -27,11 +28,12 @@ interface Props {
 
 export function ComboboxMultiSelect({
   items,
+  values,
   title = "items",
   onChange,
 }: Props) {
   const [open, setOpen] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [selectedItems, setSelectedItems] = useState<string[]>(values);
 
   useEffect(() => {
     onChange(selectedItems);

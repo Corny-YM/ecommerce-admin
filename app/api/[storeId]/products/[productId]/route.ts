@@ -40,8 +40,8 @@ export async function PATCH(
       name,
       price,
       categoryId,
-      colorId,
-      sizeId,
+      colorIds,
+      sizeIds,
       images,
       isFeatured,
       isArchived,
@@ -52,8 +52,9 @@ export async function PATCH(
     // Check body data
     if (!name) return new NextResponse("Name is required", { status: 400 });
     if (!price) return new NextResponse("Price is required", { status: 400 });
-    if (!colorId) return new NextResponse("Color ID required", { status: 400 });
-    if (!sizeId) return new NextResponse("Size ID required", { status: 400 });
+    if (!colorIds)
+      return new NextResponse("Color ID required", { status: 400 });
+    if (!sizeIds) return new NextResponse("Size ID required", { status: 400 });
     if (!categoryId)
       return new NextResponse("Category ID is required", { status: 400 });
     if (!images || !images?.length)
@@ -83,8 +84,8 @@ export async function PATCH(
         isArchived,
         isFeatured,
         categoryId,
-        colorId,
-        sizeId,
+        colorId: colorIds[0] || null,
+        sizeId: sizeIds[0] || null,
         storeId: params.storeId,
         images: { deleteMany: {} },
       },

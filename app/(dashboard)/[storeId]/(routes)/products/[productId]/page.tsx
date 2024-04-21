@@ -12,6 +12,13 @@ const ProductPage = async ({
     },
     include: {
       images: true,
+      categoryHasProducts: {
+        include: {
+          category: true,
+        },
+      },
+      productHasSizes: { include: { size: true } },
+      productHasColors: { include: { color: true } },
     },
   });
 

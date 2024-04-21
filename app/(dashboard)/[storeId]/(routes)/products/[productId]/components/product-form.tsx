@@ -8,7 +8,16 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useParams, useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Category, Color, Image, Product, Size } from "@prisma/client";
+import {
+  Category,
+  CategoryHasProduct,
+  Color,
+  Image,
+  Product,
+  ProductHasColor,
+  ProductHasSize,
+  Size,
+} from "@prisma/client";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -27,18 +36,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface ProductFormProps {
   initialData:
     | (Product & {
         images: Image[];
+        categoryHasProducts: (CategoryHasProduct & { category: Category })[];
+        productHasSizes: (ProductHasSize & { size: Size })[];
+        productHasColors: (ProductHasColor & { color: Color })[];
       })
     | null;
   categories: Category[];
@@ -52,7 +57,7 @@ const formSchema = z.object({
   name: z.string().min(1),
   images: z.object({ url: z.string() }).array(),
   price: z.coerce.number().min(1),
-  categoryId: z.string().min(1),
+  categoryIds: z.array(z.string()),
   colorIds: z.array(z.string()),
   sizeIds: z.array(z.string()),
   isFeatured: z.boolean().default(false).optional(),
@@ -78,12 +83,20 @@ const ProductForm = ({
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData
-      ? { ...initialData, price: parseFloat(String(initialData?.price)) }
+      ? {
+          ...initialData,
+          categoryIds: initialData.categoryHasProducts.map(
+            (item) => item.categoryId
+          ),
+          colorIds: initialData.productHasColors.map((item) => item.colorId),
+          sizeIds: initialData.productHasSizes.map((item) => item.sizeId),
+          price: parseFloat(String(initialData?.price)),
+        }
       : {
           name: "",
           images: [],
           price: 0,
-          categoryId: "",
+          categoryIds: [],
           colorIds: [],
           sizeIds: [],
           isFeatured: false,
@@ -93,19 +106,18 @@ const ProductForm = ({
 
   const onSubmit = async (values: ProductFormValues) => {
     try {
-      console.log(values);
-      // setLoading(true);
-      // if (initialData) {
-      //   await axios.patch(
-      //     `/api/${params.storeId}/products/${params.productId}`,
-      //     values
-      //   );
-      // } else {
-      //   await axios.post(`/api/${params.storeId}/products`, values);
-      // }
-      // toast.success(toastMessage);
-      // router.push(`/${params.storeId}/products`);
-      // router.refresh();
+      setLoading(true);
+      if (initialData) {
+        await axios.patch(
+          `/api/${params.storeId}/products/${params.productId}`,
+          values
+        );
+      } else {
+        await axios.post(`/api/${params.storeId}/products`, values);
+      }
+      toast.success(toastMessage);
+      router.push(`/${params.storeId}/products`);
+      router.refresh();
     } catch (err) {
       toast.error("Something went wrong");
     } finally {
@@ -223,32 +235,19 @@ const ProductForm = ({
               {/* Category */}
               <FormField
                 control={form.control}
-                name="categoryId"
+                name="categoryIds"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <Select
-                      disabled={loading}
-                      value={field.value}
-                      defaultValue={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue
-                            placeholder="Select a category"
-                            defaultValue={field.value}
-                          />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {categories?.map((category) => (
-                          <SelectItem key={category.id} value={category.id}>
-                            {category.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormLabel>Categories</FormLabel>
+                    <ComboboxMultiSelect
+                      title="categories"
+                      values={field.value}
+                      items={categories.map((item) => ({
+                        value: item.id,
+                        label: item.name,
+                      }))}
+                      onChange={field.onChange}
+                    />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -261,9 +260,10 @@ const ProductForm = ({
                 name="sizeIds"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Size</FormLabel>
+                    <FormLabel>Sizes</FormLabel>
                     <ComboboxMultiSelect
                       title="sizes"
+                      values={field.value}
                       items={sizes.map((item) => ({
                         value: item.id,
                         label: item.name,
@@ -280,9 +280,10 @@ const ProductForm = ({
                 name="colorIds"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Color</FormLabel>
+                    <FormLabel>Colors</FormLabel>
                     <ComboboxMultiSelect
                       title="colors"
+                      values={field.value}
                       items={colors.map((item) => ({
                         value: item.id,
                         label: item.name,

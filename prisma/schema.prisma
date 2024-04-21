@@ -59,7 +59,8 @@ model Category {
   billboardId String
   billboard   Billboard @relation(fields: [billboardId], references: [id])
 
-  products Product[] @relation("CategoryToProduct")
+  // products Product[] @relation("CategoryToProduct")
+  categoryHasProducts CategoryHasProduct[] @relation("CategoryHasProductToCategory")
 
   @@index([storeId])
   @@index([billboardId])
@@ -76,7 +77,8 @@ model Size {
   storeId String
   store   Store  @relation("StoreToSize", fields: [storeId], references: [id])
 
-  products Product[]
+  // products Product[]
+  productHasSizes ProductHasSize[] @relation("ProductHasSizeToSize")
 
   @@index([storeId])
 }
@@ -92,7 +94,8 @@ model Color {
   storeId String
   store   Store  @relation("StoreToColor", fields: [storeId], references: [id])
 
-  products Product[]
+  // products Product[]
+  productHasColors ProductHasColor[] @relation("ProductHasColorToColor")
 
   @@index([storeId])
 }
@@ -110,22 +113,66 @@ model Product {
   storeId String
   store   Store  @relation("StoreToProduct", fields: [storeId], references: [id])
 
-  categoryId String
-  category   Category @relation("CategoryToProduct", fields: [categoryId], references: [id])
-
-  sizeId String
-  size   Size   @relation(fields: [sizeId], references: [id])
-
-  colorId String
-  color   Color  @relation(fields: [colorId], references: [id])
+  // categoryId String
+  // category   Category @relation("CategoryToProduct", fields: [categoryId], references: [id])
 
   images     Image[]
   orderItems OrderItem[]
 
+  productHasColors    ProductHasColor[]    @relation("ProductHasColorToProduct")
+  productHasSizes     ProductHasSize[]     @relation("ProductHasSizeToProduct")
+  categoryHasProducts CategoryHasProduct[] @relation("CategoryHasProductToProduct")
+
+  // @@index([categoryId])
   @@index([storeId])
+}
+
+model CategoryHasProduct {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  categoryId String
+  category   Category @relation("CategoryHasProductToCategory", fields: [categoryId], references: [id])
+  productId  String
+  product    Product  @relation("CategoryHasProductToProduct", fields: [productId], references: [id])
+
+  @@unique([productId, categoryId])
   @@index([categoryId])
+  @@index([productId])
+  @@map("category_has_products")
+}
+
+model ProductHasSize {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  productId String
+  product   Product @relation("ProductHasSizeToProduct", fields: [productId], references: [id])
+  sizeId    String
+  size      Size    @relation("ProductHasSizeToSize", fields: [sizeId], references: [id])
+
+  @@unique([productId, sizeId])
   @@index([sizeId])
+  @@index([productId])
+  @@map("product_has_sizes")
+}
+
+model ProductHasColor {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  productId String
+  product   Product @relation("ProductHasColorToProduct", fields: [productId], references: [id])
+  colorId   String
+  color     Color   @relation("ProductHasColorToColor", fields: [colorId], references: [id])
+
+  @@unique([productId, colorId])
   @@index([colorId])
+  @@index([productId])
+  @@map("product_has_colors")
 }
 
 model Image {
