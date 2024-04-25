@@ -123,12 +123,9 @@ export async function GET(
       },
       include: {
         images: true,
-        categoryHasProducts: true,
-        productHasColors: true,
-        productHasSizes: true,
-        // categoryHasProducts: { select: { categoryId: true, productId: true } },
-        // productHasColors: { select: { colorId: true, productId: true } },
-        // productHasSizes: { select: { sizeId: true, productId: true } },
+        categoryHasProducts: { include: { category: true } },
+        productHasColors: { include: { color: true } },
+        productHasSizes: { include: { size: true } },
       },
       orderBy: {
         createdAt: "desc",
