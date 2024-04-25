@@ -16,9 +16,9 @@ export async function GET(
       },
       include: {
         images: true,
-        category: true,
-        size: true,
-        color: true,
+        categoryHasProducts: { include: { category: true } },
+        productHasColors: { include: { color: true } },
+        productHasSizes: { include: { size: true } },
       },
     });
 
@@ -39,7 +39,7 @@ export async function PATCH(
     const {
       name,
       price,
-      categoryId,
+      categoryIds,
       colorIds,
       sizeIds,
       images,
@@ -52,11 +52,12 @@ export async function PATCH(
     // Check body data
     if (!name) return new NextResponse("Name is required", { status: 400 });
     if (!price) return new NextResponse("Price is required", { status: 400 });
-    if (!colorIds)
-      return new NextResponse("Color ID required", { status: 400 });
-    if (!sizeIds) return new NextResponse("Size ID required", { status: 400 });
-    if (!categoryId)
-      return new NextResponse("Category ID is required", { status: 400 });
+    if (!colorIds || !colorIds?.length)
+      return new NextResponse("Colors ID required", { status: 400 });
+    if (!sizeIds || !sizeIds?.length)
+      return new NextResponse("Sizes ID required", { status: 400 });
+    if (!categoryIds || !categoryIds?.length)
+      return new NextResponse("Categories ID is required", { status: 400 });
     if (!images || !images?.length)
       return new NextResponse("Images is required", { status: 400 });
 
@@ -83,10 +84,9 @@ export async function PATCH(
         price,
         isArchived,
         isFeatured,
-        categoryId,
-        colorId: colorIds[0] || null,
-        sizeId: sizeIds[0] || null,
-        storeId: params.storeId,
+        productHasSizes: { deleteMany: {} },
+        productHasColors: { deleteMany: {} },
+        categoryHasProducts: { deleteMany: {} },
         images: { deleteMany: {} },
       },
     });
@@ -102,6 +102,31 @@ export async function PATCH(
           },
         },
       },
+    });
+
+    await prismadb.productHasColor.createMany({
+      data: [
+        ...colorIds.map((colorId: number) => ({
+          colorId,
+          productId: params.productId,
+        })),
+      ],
+    });
+    await prismadb.productHasSize.createMany({
+      data: [
+        ...sizeIds.map((sizeId: number) => ({
+          sizeId,
+          productId: params.productId,
+        })),
+      ],
+    });
+    await prismadb.categoryHasProduct.createMany({
+      data: [
+        ...categoryIds.map((categoryId: number) => ({
+          categoryId,
+          productId: params.productId,
+        })),
+      ],
     });
 
     return NextResponse.json(product);

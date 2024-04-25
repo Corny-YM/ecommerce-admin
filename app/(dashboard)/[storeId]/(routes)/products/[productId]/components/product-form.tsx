@@ -58,8 +58,8 @@ const formSchema = z.object({
   images: z.object({ url: z.string() }).array(),
   price: z.coerce.number().min(1),
   categoryIds: z.array(z.string()),
-  colorIds: z.array(z.string()),
-  sizeIds: z.array(z.string()),
+  colorIds: z.array(z.string()).min(1),
+  sizeIds: z.array(z.string()).min(1),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
 });
@@ -106,6 +106,7 @@ const ProductForm = ({
 
   const onSubmit = async (values: ProductFormValues) => {
     try {
+      console.log(values);
       setLoading(true);
       if (initialData) {
         await axios.patch(

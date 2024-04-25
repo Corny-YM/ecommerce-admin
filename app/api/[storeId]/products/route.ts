@@ -12,9 +12,9 @@ export async function POST(
     const {
       name,
       price,
-      categoryId,
-      colorId,
-      sizeId,
+      categoryIds,
+      colorIds,
+      sizeIds,
       images,
       isFeatured,
       isArchived,
@@ -26,10 +26,12 @@ export async function POST(
     // Check body data
     if (!name) return new NextResponse("Name is required", { status: 400 });
     if (!price) return new NextResponse("Price is required", { status: 400 });
-    if (!colorId) return new NextResponse("Color ID required", { status: 400 });
-    if (!sizeId) return new NextResponse("Size ID required", { status: 400 });
-    if (!categoryId)
-      return new NextResponse("Category ID is required", { status: 400 });
+    if (!colorIds || !colorIds?.length)
+      return new NextResponse("Colors ID required", { status: 400 });
+    if (!sizeIds || !sizeIds?.length)
+      return new NextResponse("Sizes ID required", { status: 400 });
+    if (!categoryIds || !categoryIds?.length)
+      return new NextResponse("Categories ID is required", { status: 400 });
     if (!images || !images?.length)
       return new NextResponse("Images is required", { status: 400 });
 
@@ -53,10 +55,34 @@ export async function POST(
         price,
         isArchived,
         isFeatured,
-        categoryId,
-        colorId,
-        sizeId,
         storeId: params.storeId,
+        productHasColors: {
+          createMany: {
+            data: [
+              ...colorIds.map((colorId: number) => ({
+                colorId,
+              })),
+            ],
+          },
+        },
+        productHasSizes: {
+          createMany: {
+            data: [
+              ...sizeIds.map((sizeId: number) => ({
+                sizeId,
+              })),
+            ],
+          },
+        },
+        categoryHasProducts: {
+          createMany: {
+            data: [
+              ...categoryIds.map((categoryId: number) => ({
+                categoryId,
+              })),
+            ],
+          },
+        },
         images: {
           createMany: {
             data: [...images.map((img: { url: string }) => img)],
@@ -89,17 +115,20 @@ export async function GET(
     const products = await prismadb.product.findMany({
       where: {
         storeId: params.storeId,
-        categoryId,
-        colorId,
-        sizeId,
+        categoryHasProducts: { some: { categoryId: categoryId } },
+        productHasColors: { some: { colorId: colorId } },
+        productHasSizes: { some: { sizeId: sizeId } },
         isFeatured: isFeatured ? true : undefined,
         isArchived: false,
       },
       include: {
         images: true,
-        category: true,
-        color: true,
-        size: true,
+        categoryHasProducts: true,
+        productHasColors: true,
+        productHasSizes: true,
+        // categoryHasProducts: { select: { categoryId: true, productId: true } },
+        // productHasColors: { select: { colorId: true, productId: true } },
+        // productHasSizes: { select: { sizeId: true, productId: true } },
       },
       orderBy: {
         createdAt: "desc",
