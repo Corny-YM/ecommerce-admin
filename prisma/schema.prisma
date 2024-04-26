@@ -14,6 +14,18 @@ datasource db {
   relationMode = "prisma"
 }
 
+model User {
+  id           String   @id
+  firstName    String
+  lastName     String
+  fullName     String
+  email        String   @unique
+  imageUrl     String
+  lastSignInAt DateTime
+  createdAt    DateTime
+  updatedAt    DateTime
+}
+
 model Store {
   id        String   @id @default(uuid())
   name      String
@@ -79,6 +91,7 @@ model Size {
 
   // products Product[]
   productHasSizes ProductHasSize[] @relation("ProductHasSizeToSize")
+  carts           Cart[]
 
   @@index([storeId])
 }
@@ -96,6 +109,7 @@ model Color {
 
   // products Product[]
   productHasColors ProductHasColor[] @relation("ProductHasColorToColor")
+  carts            Cart[]
 
   @@index([storeId])
 }
@@ -118,6 +132,7 @@ model Product {
 
   images     Image[]
   orderItems OrderItem[]
+  carts      Cart[]
 
   productHasColors    ProductHasColor[]    @relation("ProductHasColorToProduct")
   productHasSizes     ProductHasSize[]     @relation("ProductHasSizeToProduct")
@@ -185,6 +200,28 @@ model Image {
   productId String
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
+  @@index([productId])
+}
+
+model Cart {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relations
+  userId String
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  sizeId String
+  size   Size   @relation(fields: [sizeId], references: [id])
+
+  colorId String
+  color   Color  @relation(fields: [colorId], references: [id])
+
+  @@index([sizeId])
+  @@index([colorId])
   @@index([productId])
 }
 
