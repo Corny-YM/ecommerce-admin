@@ -24,6 +24,8 @@ model User {
   lastSignInAt DateTime
   createdAt    DateTime
   updatedAt    DateTime
+
+  carts Cart[]
 }
 
 model Store {
@@ -40,6 +42,7 @@ model Store {
   colors     Color[]     @relation("StoreToColor")
   products   Product[]   @relation("StoreToProduct")
   orders     Order[]     @relation("StoreToOrder")
+  carts      Cart[]
 }
 
 model Billboard {
@@ -205,11 +208,16 @@ model Image {
 
 model Cart {
   id        String   @id @default(uuid())
+  quantity  Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // relations
   userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id])
 
   productId String
   product   Product @relation(fields: [productId], references: [id])
@@ -220,8 +228,11 @@ model Cart {
   colorId String
   color   Color  @relation(fields: [colorId], references: [id])
 
+  @@unique([userId, storeId, productId, sizeId, colorId])
+  @@index([userId])
   @@index([sizeId])
   @@index([colorId])
+  @@index([storeId])
   @@index([productId])
 }
 
