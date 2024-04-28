@@ -56,3 +56,26 @@ export async function POST(req: Request) {
     return new NextResponse("Internal error", { status: 500 });
   }
 }
+
+export async function PATCH(req: Request) {
+  try {
+    const body = await req.json();
+    const { quantity, cartId } = body;
+
+    if (!cartId)
+      return new NextResponse("Cart id is required", { status: 400 });
+
+    console.log(quantity);
+    if (quantity) {
+      await prismadb.cart.update({
+        where: { id: cartId },
+        data: { quantity },
+      });
+    }
+
+    return NextResponse.json({});
+  } catch (err) {
+    console.log("[CART_PATCH]", err);
+    return new NextResponse("Internal error", { status: 500 });
+  }
+}

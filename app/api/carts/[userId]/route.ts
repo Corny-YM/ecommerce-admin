@@ -13,21 +13,24 @@ export async function GET(
       return new NextResponse("User id is required", { status: 400 });
 
     // Use Prisma's aggregation function to sum the quantities
-    const result = await prismadb.cart.aggregate({
-      where: {
-        userId: userId,
+    const result = await prismadb.cart.findMany({
+      where: { userId },
+      include: {
+        product: { include: { images: true } },
+        color: true,
+        size: true,
+        store: true,
       },
-      _sum: {
-        quantity: true,
-      },
+      orderBy: [
+        { createdAt: "desc" },
+        { storeId: "desc" },
+        { product: { name: "desc" } },
+      ],
     });
 
-    // Access the sum of quantities from the result
-    const sumQuantity = result._sum?.quantity ?? 0;
-
-    return NextResponse.json({ quantity: sumQuantity });
+    return NextResponse.json(result);
   } catch (err) {
-    console.log("[CARTS_QUANTITY_GET]", err);
+    console.log("[CARTS_GET_BY_USER_ID]", err);
     return new NextResponse("Internal error", { status: 500 });
   }
 }
