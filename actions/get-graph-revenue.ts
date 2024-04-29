@@ -8,11 +8,11 @@ interface GraphData {
 export const getGraphRevenue = async (storeId: string) => {
   const paidOrders = await prismadb.order.findMany({
     where: {
-      storeId,
       isPaid: true,
     },
     include: {
       orderItems: {
+        where: { storeId },
         include: {
           product: true,
         },

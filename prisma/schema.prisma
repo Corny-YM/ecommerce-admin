@@ -25,7 +25,8 @@ model User {
   createdAt    DateTime
   updatedAt    DateTime
 
-  carts Cart[]
+  carts  Cart[]
+  orders Order[] @relation("OrderToUser")
 }
 
 model Store {
@@ -41,7 +42,7 @@ model Store {
   sizes      Size[]      @relation("StoreToSize")
   colors     Color[]     @relation("StoreToColor")
   products   Product[]   @relation("StoreToProduct")
-  orders     Order[]     @relation("StoreToOrder")
+  orders     OrderItem[] @relation("OrderItemToStore")
   carts      Cart[]
 }
 
@@ -95,6 +96,7 @@ model Size {
   // products Product[]
   productHasSizes ProductHasSize[] @relation("ProductHasSizeToSize")
   carts           Cart[]
+  orderItems      OrderItem[]      @relation("OrderItemToSize")
 
   @@index([storeId])
 }
@@ -113,6 +115,7 @@ model Color {
   // products Product[]
   productHasColors ProductHasColor[] @relation("ProductHasColorToColor")
   carts            Cart[]
+  orderItems       OrderItem[]       @relation("OrderItemToColor")
 
   @@index([storeId])
 }
@@ -132,11 +135,9 @@ model Product {
 
   // categoryId String
   // category   Category @relation("CategoryToProduct", fields: [categoryId], references: [id])
-
-  images     Image[]
-  orderItems OrderItem[]
-  carts      Cart[]
-
+  images              Image[]
+  carts               Cart[]
+  orderItems          OrderItem[]          @relation("OrderItemToProduct")
   productHasColors    ProductHasColor[]    @relation("ProductHasColorToProduct")
   productHasSizes     ProductHasSize[]     @relation("ProductHasSizeToProduct")
   categoryHasProducts CategoryHasProduct[] @relation("CategoryHasProductToProduct")
@@ -245,24 +246,39 @@ model Order {
   updatedAt DateTime @updatedAt
 
   // relation
-  storeId String
-  store   Store  @relation("StoreToOrder", fields: [storeId], references: [id])
+  userId String
+  user   User   @relation("OrderToUser", fields: [userId], references: [id])
 
   orderItems OrderItem[]
 
-  @@index([storeId])
+  @@index([userId])
 }
 
 model OrderItem {
-  id String @id @default(uuid())
+  id        Int      @id @default(autoincrement())
+  quantity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // relation
   orderId String
   order   Order  @relation(fields: [orderId], references: [id])
 
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
+  storeId String
+  store   Store  @relation("OrderItemToStore", fields: [storeId], references: [id])
 
+  productId String
+  product   Product @relation("OrderItemToProduct", fields: [productId], references: [id])
+
+  sizeId String
+  size   Size   @relation("OrderItemToSize", fields: [sizeId], references: [id])
+
+  colorId String
+  color   Color  @relation("OrderItemToColor", fields: [colorId], references: [id])
+
+  @@index([sizeId])
   @@index([orderId])
+  @@index([storeId])
+  @@index([colorId])
   @@index([productId])
 }

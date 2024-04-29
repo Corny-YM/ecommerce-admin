@@ -65,7 +65,6 @@ export async function PATCH(req: Request) {
     if (!cartId)
       return new NextResponse("Cart id is required", { status: 400 });
 
-    console.log(quantity);
     if (quantity) {
       await prismadb.cart.update({
         where: { id: cartId },

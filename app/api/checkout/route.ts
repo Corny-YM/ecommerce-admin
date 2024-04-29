@@ -14,46 +14,46 @@ export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
 }
 
-export async function POST(
-  req: Request,
-  { params }: { params: { storeId: string } }
-) {
-  const { productIds } = await req.json();
-  
-  if (!productIds || !productIds.length)
-    return new NextResponse("Product ids are required", { status: 400 });
+export async function POST(req: Request) {
+  const { userId, cartIds } = await req.json();
 
-  const products = await prismadb.product.findMany({
-    where: {
-      id: {
-        in: productIds,
-      },
-    },
+  if (!userId) return new NextResponse("User id are required", { status: 400 });
+
+  if (!cartIds || !cartIds.length)
+    return new NextResponse("Cart ids are required", { status: 400 });
+
+  const carts = await prismadb.cart.findMany({
+    where: { id: { in: cartIds } },
+    include: { product: true, color: true, size: true },
   });
 
   const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
 
-  products.forEach((product) => {
+  carts.forEach((cart) => {
+    const { id, product, quantity, colorId, sizeId, storeId, productId } = cart;
+    const unit_amount = product.price.toNumber() * 100;
     line_items.push({
-      quantity: 1,
+      quantity: quantity,
       price_data: {
         currency: "USD",
         product_data: {
           name: product.name,
+          metadata: { colorId, sizeId, storeId, productId, cartId: id },
         },
-        unit_amount: product.price.toNumber() * 100,
+        unit_amount,
       },
     });
   });
 
   const order = await prismadb.order.create({
     data: {
-      storeId: params.storeId,
       isPaid: false,
+      userId: userId,
       orderItems: {
-        create: productIds.map((id: string) => ({
-          product: { connect: { id } },
-        })),
+        create: carts.map((cart) => {
+          const { quantity, sizeId, colorId, storeId, productId } = cart;
+          return { quantity, sizeId, colorId, storeId, productId };
+        }),
       },
     },
   });
@@ -62,14 +62,10 @@ export async function POST(
     line_items,
     mode: "payment",
     billing_address_collection: "required",
-    phone_number_collection: {
-      enabled: true,
-    },
+    phone_number_collection: { enabled: true },
     success_url: `${process.env.FRONTEND_STORE_URL}/cart?success=1`,
     cancel_url: `${process.env.FRONTEND_STORE_URL}/cart?canceled=1`,
-    metadata: {
-      orderId: order.id,
-    },
+    metadata: { orderId: order.id, userId: order.userId },
   });
 
   return NextResponse.json({ url: session.url }, { headers: corsHeaders });

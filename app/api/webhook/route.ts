@@ -51,18 +51,27 @@ export async function POST(req: Request) {
       },
     });
 
-    const productIds = order.orderItems.map((orderItem) => orderItem.productId);
+    const productIds: string[] = [];
+    const storeIds: string[] = [];
+    const colorIds: string[] = [];
+    const sizeIds: string[] = [];
+    order.orderItems.forEach((orderItem) => {
+      const { productId, storeId, colorId, sizeId } = orderItem;
+      productIds.push(productId);
+      storeIds.push(storeId);
+      colorIds.push(colorId);
+      sizeIds.push(sizeId);
+    });
 
-    // await prismadb.product.updateMany({
-    //   where: {
-    //     id: {
-    //       in: [...productIds],
-    //     },
-    //   },
-    //   data: {
-    //     isArchived: true,
-    //   },
-    // });
+    // Remove all cart items when buy successfully
+    await prismadb.cart.deleteMany({
+      where: {
+        productId: { in: productIds },
+        storeId: { in: storeIds },
+        colorId: { in: colorIds },
+        sizeId: { in: sizeIds },
+      },
+    });
   }
 
   return new NextResponse(null, { status: 200 });

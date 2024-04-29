@@ -106,7 +106,6 @@ const ProductForm = ({
 
   const onSubmit = async (values: ProductFormValues) => {
     try {
-      console.log(values);
       setLoading(true);
       if (initialData) {
         await axios.patch(

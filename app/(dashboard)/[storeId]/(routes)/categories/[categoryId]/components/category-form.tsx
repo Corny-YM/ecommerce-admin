@@ -7,7 +7,6 @@ import { Trash } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useParams, useRouter } from "next/navigation";
-import { useOrigin } from "@/hooks/use-origin";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Billboard, Category } from "@prisma/client";
 import { Input } from "@/components/ui/input";
@@ -46,7 +45,6 @@ const formSchema = z.object({
 const CategoryForm = ({ initialData, billboards }: CategoryFormProps) => {
   const params = useParams();
   const router = useRouter();
-  const origin = useOrigin();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -59,7 +57,7 @@ const CategoryForm = ({ initialData, billboards }: CategoryFormProps) => {
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
       name: "",
-      billboardId: "",
+      billboardId: billboards?.[0].id || "",
     },
   });
 
