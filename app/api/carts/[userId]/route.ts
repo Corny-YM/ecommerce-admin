@@ -34,3 +34,27 @@ export async function GET(
     return new NextResponse("Internal error", { status: 500 });
   }
 }
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: { userId: string } }
+) {
+  try {
+    const body = await req.json();
+    const userId = params.userId;
+    const { cartId } = body;
+    console.log("==============cartId", cartId);
+
+    if (!userId) return new NextResponse("Unauthenticated", { status: 401 });
+
+    if (!cartId)
+      return new NextResponse("Cart id is required", { status: 400 });
+
+    await prismadb.cart.delete({ where: { id: cartId, userId } });
+
+    return NextResponse.json({});
+  } catch (err) {
+    console.log("[BILLBOARD_DELETE]", err);
+    return new NextResponse("Internal error", { status: 500 });
+  }
+}
