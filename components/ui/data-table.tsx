@@ -37,13 +37,11 @@ export function DataTable<TData, TValue>({
   const table = useReactTable({
     data,
     columns,
+    state: { columnFilters },
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
-    state: {
-      columnFilters,
-    },
   });
 
   return (
@@ -57,6 +55,21 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-sm"
         />
+        <div className="flex ml-2 items-center gap-2">
+          {/* TODO: layout, api for getting orders */}
+          <Button className="w-24" variant="secondary" size="sm">
+            All
+          </Button>
+          <Button className="w-24" variant="secondary" size="sm">
+            Months
+          </Button>
+          <Button className="w-24" variant="secondary" size="sm">
+            Weeks
+          </Button>
+          <Button className="w-24" variant="secondary" size="sm">
+            Days
+          </Button>
+        </div>
       </div>
       <div className="rounded-md border">
         <Table>

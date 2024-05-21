@@ -54,3 +54,48 @@ export const getGraphRevenue = async (storeId: string) => {
 
   return graphData;
 };
+
+// const aggregateByMonth = (data: (Order & { orderItems: OrderItem[] })[]) => {
+//   const result: Record<string, any> = {};
+//   data.forEach((order) => {
+//     const month = format(order.createdAt, "MMMM yyyy");
+//     if (!result[month]) {
+//       result[month] = 0;
+//     }
+//     result[month] += order.orderItems.reduce(
+//       (sum, item) => sum + item.quantity,
+//       0
+//     );
+//   });
+//   return Object.entries(result).map(([name, total]) => ({ name, total }));
+// };
+
+// const aggregateByWeek = (data: (Order & { orderItems: OrderItem[] })[]) => {
+//   const result: Record<string, any> = {};
+//   data.forEach((order) => {
+//     const week = `Week ${format(startOfWeek(order.createdAt), "w yyyy")}`;
+//     if (!result[week]) {
+//       result[week] = 0;
+//     }
+//     result[week] += order.orderItems.reduce(
+//       (sum, item) => sum + item.quantity,
+//       0
+//     );
+//   });
+//   return Object.entries(result).map(([name, total]) => ({ name, total }));
+// };
+
+// const aggregateByDay = (data: (Order & { orderItems: OrderItem[] })[]) => {
+//   const result: Record<string, any> = {};
+//   data.forEach((order) => {
+//     const day = format(order.createdAt, "yyyy-MM-dd");
+//     if (!result[day]) {
+//       result[day] = 0;
+//     }
+//     result[day] += order.orderItems.reduce(
+//       (sum, item) => sum + item.quantity,
+//       0
+//     );
+//   });
+//   return Object.entries(result).map(([name, total]) => ({ name, total }));
+// };
