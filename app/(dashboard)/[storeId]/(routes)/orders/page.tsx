@@ -10,7 +10,7 @@ const OrdersPage = async ({ params }: { params: { storeId: string } }) => {
     include: {
       orderItems: {
         where: { storeId: params.storeId },
-        include: { product: true },
+        include: { product: true, size: true, color: true },
       },
     },
     orderBy: { createdAt: "desc" },
@@ -33,7 +33,7 @@ const OrdersPage = async ({ params }: { params: { storeId: string } }) => {
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
-        <OrderClient data={formattedOrder} />
+        <OrderClient storeId={params.storeId} data={formattedOrder} />
       </div>
     </div>
   );

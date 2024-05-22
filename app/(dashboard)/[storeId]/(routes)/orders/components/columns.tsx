@@ -1,10 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
+import { Color, OrderItem, Product, Size } from "@prisma/client";
 
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
-import { OrderItem, Product } from "@prisma/client";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -13,7 +13,7 @@ export type OrderColumn = {
   phone: string;
   address: string;
   isPaid: boolean;
-  orderItems: (OrderItem & { product: Product })[];
+  orderItems: (OrderItem & { product: Product; size: Size; color: Color })[];
   totalPrice: string;
   createdAt: string;
 };
@@ -24,16 +24,23 @@ export const columns: ColumnDef<OrderColumn>[] = [
     header: "Products",
     cell: ({ row }) => {
       return (
-        <div className="flex items-center gap-2">
+        <div className="max-w-[600px] flex flex-wrap items-center gap-2">
           {row.original.orderItems?.map((orderItem) => {
-            const { id, product, storeId } = orderItem;
+            const { id, product, size, color, storeId } = orderItem;
             return (
               <Link
                 key={id}
                 href={`/${storeId}/products/${product.id}`}
                 target="_blank"
+                className="min-w-fit flex flex-wrap gap-1 bg-[#3498db50] p-2 rounded-md"
               >
-                <Badge>{product.name}</Badge>
+                <span>{product.name}</span>
+                <div className="flex items-center gap-x-1">
+                  <Badge>{size.value}</Badge>
+                  <Badge style={{ backgroundColor: color.value }}>
+                    {color.value}
+                  </Badge>
+                </div>
               </Link>
             );
           })}

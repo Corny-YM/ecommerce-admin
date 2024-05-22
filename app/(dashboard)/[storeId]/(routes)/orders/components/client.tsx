@@ -1,16 +1,18 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { OrderContextProvider } from "@/providers/orders-provider";
 import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { DataTable } from "@/components/ui/data-table";
 import { OrderColumn, columns } from "./columns";
+import ProductOrders from "./product-orders";
 
 interface OrderClientProps {
   data: OrderColumn[];
+  storeId: string;
 }
 
-export const OrderClient = ({ data }: OrderClientProps) => {
+export const OrderClient = ({ data, storeId }: OrderClientProps) => {
   return (
     <>
       <Heading
@@ -19,23 +21,9 @@ export const OrderClient = ({ data }: OrderClientProps) => {
       />
       <Separator />
       <DataTable searchKey="products" columns={columns} data={data} />
-      <div>
-        <div className="flex ml-2 items-center gap-2">
-          {/* TODO: layout, api for getting orders */}
-          <Button className="w-24" variant="secondary" size="sm">
-            All
-          </Button>
-          <Button className="w-24" variant="secondary" size="sm">
-            Months
-          </Button>
-          <Button className="w-24" variant="secondary" size="sm">
-            Weeks
-          </Button>
-          <Button className="w-24" variant="secondary" size="sm">
-            Days
-          </Button>
-        </div>
-      </div>
+      <OrderContextProvider>
+        <ProductOrders storeId={storeId} />
+      </OrderContextProvider>
     </>
   );
 };
