@@ -1,8 +1,12 @@
 "use client";
 
-import { useParams, usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { useMemo } from "react";
 import Link from "next/link";
+import { useParams, usePathname } from "next/navigation";
+
+import { cn } from "@/lib/utils";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import NavbarSheet from "@/components/navbar-sheet";
 
 const MainNav = ({
   className,
@@ -54,9 +58,9 @@ const MainNav = ({
     },
   ];
 
-  return (
-    <nav className={cn("flex items-center space-x-4 lg:space-x-6", className)}>
-      {routes.map((route) => (
+  const content = useMemo(
+    () =>
+      routes.map((route) => (
         <Link
           key={route.href}
           href={route.href}
@@ -69,8 +73,24 @@ const MainNav = ({
         >
           {route.label}
         </Link>
-      ))}
-    </nav>
+      )),
+    [routes]
+  );
+
+  return (
+    <>
+      <div className="flex items-center justify-center md:hidden ml-1">
+        <NavbarSheet routes={routes} />
+      </div>
+      <ScrollArea className="hidden md:block py-4 max-w-full">
+        <nav
+          className={cn("flex items-center space-x-4 lg:space-x-6", className)}
+        >
+          {content}
+        </nav>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
+    </>
   );
 };
 

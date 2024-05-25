@@ -6,12 +6,14 @@ import { ProductColumn } from "./components/columns";
 
 const ProductsPage = async ({ params }: { params: { storeId: string } }) => {
   const products = await prismadb.product.findMany({
-    where: {
-      storeId: params.storeId,
+    include: {
+      images: true,
+      // categoryHasProducts: { include: { category: true } },
+      productHasSizes: { include: { size: true } },
+      productHasColors: { include: { color: true } },
     },
-    orderBy: {
-      createdAt: "desc",
-    },
+    where: { storeId: params.storeId },
+    orderBy: { createdAt: "desc" },
   });
 
   const formattedProducts: ProductColumn[] = products.map((item) => ({
@@ -20,9 +22,9 @@ const ProductsPage = async ({ params }: { params: { storeId: string } }) => {
     isFeatured: item.isFeatured,
     isArchived: item.isArchived,
     price: formatter.format(item.price.toNumber()),
-    // categories: item.categoryHasProducts,
-    // sizes: item.productHasSizes,
-    // colors: item.productHasColors,
+    images: item.images,
+    sizes: item.productHasSizes.map(item => item.size),
+    colors: item.productHasColors.map(item => item.color),
     createdAt: format(item.createdAt, "MMMM do, yyyy"),
   }));
 

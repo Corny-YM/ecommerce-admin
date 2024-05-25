@@ -96,7 +96,7 @@ const SettingForm = ({ initialData }: SettingFormProps) => {
           className="space-y-8 w-full"
           onSubmit={form.handleSubmit(onSubmit)}
         >
-          <div className="grid grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-3 gap-8">
             <FormField
               control={form.control}
               name="name"

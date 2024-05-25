@@ -194,7 +194,7 @@ const ProductForm = ({
           />
           {/* <div className="grid grid-cols-3 gap-8"> */}
           <div className="flex flex-col justify-center items-center gap-y-4">
-            <div className="w-full grid grid-cols-3 gap-4">
+            <div className="w-full grid md:grid-cols-2 lg:grid-cols-3 gap-1 lg:gap-4">
               {/* Name */}
               <FormField
                 control={form.control}
@@ -237,7 +237,7 @@ const ProductForm = ({
                 control={form.control}
                 name="categoryIds"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="md:col-span-2 lg:col-span-1">
                     <FormLabel>Categories</FormLabel>
                     <ComboboxMultiSelect
                       title="categories"
@@ -253,7 +253,7 @@ const ProductForm = ({
                 )}
               />
             </div>
-            <div className="w-full h-fit grid grid-cols-2 gap-4">
+            <div className="w-full h-fit grid md:grid-cols-2 gap-1 lg:gap-4">
               {/* Size */}
               <FormField
                 control={form.control}
@@ -295,7 +295,7 @@ const ProductForm = ({
                 )}
               />
             </div>
-            <div className="w-full grid grid-cols-2 gap-4">
+            <div className="w-full grid md:grid-cols-2 gap-1 lg:gap-4">
               {/* Feature */}
               <FormField
                 control={form.control}

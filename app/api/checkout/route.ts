@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
   carts.forEach((cart) => {
     const { id, product, quantity, colorId, sizeId, storeId, productId } = cart;
-    const unit_amount = product.price.toNumber() * 100;
+    const unit_amount = Math.round(product.price.toNumber() * 100);
     line_items.push({
       quantity: quantity,
       price_data: {
