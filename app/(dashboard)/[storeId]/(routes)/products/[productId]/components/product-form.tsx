@@ -57,6 +57,7 @@ const formSchema = z.object({
   name: z.string().min(1),
   images: z.object({ url: z.string() }).array(),
   price: z.coerce.number().min(1),
+  quantity: z.coerce.number().min(0).max(99),
   categoryIds: z.array(z.string()),
   colorIds: z.array(z.string()).min(1),
   sizeIds: z.array(z.string()).min(1),
@@ -91,11 +92,13 @@ const ProductForm = ({
           colorIds: initialData.productHasColors.map((item) => item.colorId),
           sizeIds: initialData.productHasSizes.map((item) => item.sizeId),
           price: parseFloat(String(initialData?.price)),
+          quantity: initialData.quantity,
         }
       : {
           name: "",
           images: [],
           price: 0,
+          quantity: 0,
           categoryIds: [],
           colorIds: [],
           sizeIds: [],
@@ -116,7 +119,7 @@ const ProductForm = ({
         await axios.post(`/api/${params.storeId}/products`, values);
       }
       toast.success(toastMessage);
-      router.push(`/${params.storeId}/products`);
+      // router.push(`/${params.storeId}/products`);
       router.refresh();
     } catch (err) {
       toast.error("Something went wrong");
@@ -232,6 +235,22 @@ const ProductForm = ({
                   </FormItem>
                 )}
               />
+              {/* Quantity */}
+              <FormField
+                control={form.control}
+                name="quantity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Quantity</FormLabel>
+                    <FormControl>
+                      <Input type="number" disabled={loading} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="w-full h-fit grid md:grid-cols-3 gap-1 lg:gap-4">
               {/* Category */}
               <FormField
                 control={form.control}
@@ -252,8 +271,6 @@ const ProductForm = ({
                   </FormItem>
                 )}
               />
-            </div>
-            <div className="w-full h-fit grid md:grid-cols-2 gap-1 lg:gap-4">
               {/* Size */}
               <FormField
                 control={form.control}

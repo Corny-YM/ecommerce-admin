@@ -124,8 +124,9 @@ model Product {
   id         String   @id @default(uuid())
   name       String
   price      Decimal
-  isFeatured Boolean  @default(false)
+  quantity   Int      @default(0)
   isArchived Boolean  @default(false)
+  isFeatured Boolean  @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -240,6 +241,7 @@ model Cart {
 model Order {
   id        String   @id @default(uuid())
   isPaid    Boolean  @default(false)
+  type      String   @default("card") @db.VarChar(10)
   phone     String   @default("")
   address   String   @default("")
   createdAt DateTime @default(now())

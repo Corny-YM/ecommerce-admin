@@ -45,6 +45,7 @@ export async function PATCH(
       images,
       isFeatured,
       isArchived,
+      quantity,
     } = body;
 
     if (!userId) return new NextResponse("Unauthenticated", { status: 401 });
@@ -84,6 +85,7 @@ export async function PATCH(
         price,
         isArchived,
         isFeatured,
+        quantity: quantity || 0,
         productHasSizes: { deleteMany: {} },
         productHasColors: { deleteMany: {} },
         categoryHasProducts: { deleteMany: {} },
