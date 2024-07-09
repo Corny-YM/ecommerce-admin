@@ -9,8 +9,8 @@ import { getProductSold } from "@/actions/get-products-sold";
 import { useOrderContext } from "@/providers/orders-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import NoImg from "@/public/imgs/no-img.jpg";
 import { cn } from "@/lib/utils";
+import NoImg from "@/public/imgs/no-img.jpg";
 
 interface Props {
   storeId: string;
@@ -81,6 +81,7 @@ const ProductOrders = ({ storeId }: Props) => {
           <Link
             className="w-full flex justify-between gap-2 p-4 border border-solid shadow rounded-lg hover:bg-primary/20 transition cursor-pointer"
             target="_blank"
+            key={`${product.id}/${product.quantity}/${product.size.id}/${product.color.id}`}
             href={`/${storeId}/products/${product.id}`}
           >
             <div className="relative w-10 h-10 flex justify-center items-center rounded-lg overflow-hidden">
